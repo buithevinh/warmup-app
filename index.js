@@ -35,9 +35,17 @@ async function runWarmUp() {
 
   const limit = pLimit(20); // max 20 song song
   const urls = _.flatten(
-    rows.rows.map((row) => JSON.parse(row.images.replace(/\\"/g, '"')) || [])
-  );
-
+  rows.rows.map(row => {
+    console.log(row.images)
+    if (!row.images) return []; // bỏ qua row không có images
+    try {
+      return JSON.parse(row.images.replace(/\\"/g, '"')) || [];
+    } catch (err) {
+      console.error("Failed to parse images for id", row.id, err);
+      return [];
+    }
+  })
+);
   const promises = urls.map((url) =>
     limit(async () => {
       try {
